@@ -34,10 +34,10 @@ vehicles <- as.data.frame( SCC[grep("vehicles", SCC$SCC.Level.Two,ignore.case=T)
 
 # name this frame SCC so we can merge it back into our baltimore data
 names(vehicles) <- "SCC"
-data3 <- merge(vehicles, baltimore, by = "SCC")
+baltimore <- merge(vehicles, baltimore, by = "SCC")
 
 # now do our default grouping and sum the emissions
-pd <- ddply(data3, .(year), summarize, sum = sum(Emissions))
+pd <- ddply(baltimore, .(year), summarize, sum = sum(Emissions))
 png("plot5.png")
 p <- ggplot(pd, aes(year, sum))
 p + geom_point(size=4) + labs(title="Baltimore Emissions", y="Total Emissions")
