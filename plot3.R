@@ -30,8 +30,10 @@ data <- transform(NEI, year = factor(year))
 baltimore <-data[data$fips == "24510",]
 
 # same as plot 1 here, sum by emissions
-baltimore <- ddply(baltimore, .(year), summarize, sum = sum(Emissions))
-png("plot2.png")
-plot(baltimore$year, baltimore$sum, type="n", xlab="year", ylab="total PM Emissions")
-lines(baltimore$year, baltimore$sum)
+baltimore <- ddply(baltimore, .(year,type), summarize, sum = sum(Emissions))
+png("plot3.png")
+
+# plot sum vs year
+p <- ggplot(baltimore, aes(year,sum))
+p + geom_point() + facet_grid(.~type) + labs(title="Baltimore Emission", y="Total Emissions")
 dev.off()
