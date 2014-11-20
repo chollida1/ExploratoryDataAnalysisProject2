@@ -26,19 +26,24 @@ SCC <- readRDS("Source_Classification_Code.rds")
 
 # turn year into a factor and type into a factor
 data <- transform(NEI, year = factor(year), type = factor(type))
-baltimore <- data[data$fips == '24510',]
+
+# join data from Baltimore and Los Angeles
+data <- data[data$fips == "24510" | data$fips == "06037",]
 
 # again we need to use grep to find all vehicle cases
 # NOTE, must have ignore case set to true otherwise I'll end up with no observations
 vehicles <- as.data.frame( SCC[grep("vehicles", SCC$SCC.Level.Two,ignore.case=T), 1])
+names(vehicles)<-"SCC"
+data <- merge(vehicles, data, by = "SCC")
 
-# name this frame SCC so we can merge it back into our baltimore data
-names(vehicles) <- "SCC"
-baltimore <- merge(vehicles, baltimore, by = "SCC")
+# now we label our city data so that it shows up properly on the plot
+data$city[data$fips == "24510"] <- "Baltimore"
+data$city[data$fips == "06037"] <- "LosAngeles"
 
-# now do our default grouping and sum the emissions
-pd <- ddply(baltimore, .(year), summarize, sum = sum(Emissions))
-png("plot5.png")
-p <- ggplot(pd, aes(year, sum))
-p + geom_point(size = 10) + labs(title="Baltimore Emissions", y="Total Emissions")
+# now group by year and city
+baltimore.la <- ddply(data, .(year, city), summarize, sum = sum(Emissions))
+png("plot6.png")
+p <- ggplot(baltimore.la, aes(year, sum))
+# we color the city emissions so we can tell them apart
+p + geom_point(size = 10, aes(color = city)) + labs(title = "Motor Vehicle Emissions", y = "Total Emissions")
 dev.off()
